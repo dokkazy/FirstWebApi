@@ -20,10 +20,17 @@ namespace FirstWebApi.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll(string? search, double? from, double? to, string? sortBy, int page = 1)
         {
-            var list = _productRepository.GetAll();
-            return Ok(list);
+            try
+            {
+                var list = await _productRepository.GetAll(search, from, to, sortBy,page);
+                return Ok(list);
+            }
+            catch
+            {
+                return BadRequest("We can't get product");
+            }
         }
 
         [HttpGet("{id}")]
@@ -34,7 +41,8 @@ namespace FirstWebApi.Controllers
                 var product = _productRepository.GetById(id);
                 if (product == null) return NotFound();
                 return Ok(product);
-            }catch
+            }
+            catch
             {
                 return BadRequest();
             }

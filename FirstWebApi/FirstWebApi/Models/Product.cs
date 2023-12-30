@@ -27,7 +27,7 @@ namespace FirstWebApi.Models
 
         public int? CategoryId { get; set; }
 
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
-        public virtual Category Category { get; set; }
+        public ICollection<OrderDetail> OrderDetails { get; set; }
+        public Category Category { get; set; }
     }
 }

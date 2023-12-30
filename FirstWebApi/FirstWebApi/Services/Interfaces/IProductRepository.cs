@@ -1,13 +1,14 @@
-﻿using FirstWebApi.ViewModels;
+﻿using FirstWebApi.Services.Pagination;
+using FirstWebApi.ViewModels;
 
 namespace FirstWebApi.Services.Interfaces
 {
-    public interface IProductRepository : IRepository<ProductViewModel, string>
+    public interface IProductRepository
     {
-        new IEnumerable<ProductViewModel> GetAll();
-        new ProductViewModel GetById(string id);
-        new ProductViewModel Add(ProductViewModel model);
-        new void Update(ProductViewModel model);
-        new void Remove(string id);
+        Task<PaginatedList<ProductViewModel>> GetAll(string? search, double? from, double? to, string? sortBy, int page = 1);
+        ProductViewModel GetById(string id);
+        ProductViewModel Add(ProductViewModel model);
+        void Update(ProductViewModel model);
+        void Remove(string id);
     }
 }

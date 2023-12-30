@@ -22,7 +22,7 @@ namespace FirstWebApi.Models
         [DataType(DataType.PhoneNumber)]
         public string Phone { get; set;}
 
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
+        public ICollection<OrderDetail> OrderDetails { get; set; }
 
     }
 }

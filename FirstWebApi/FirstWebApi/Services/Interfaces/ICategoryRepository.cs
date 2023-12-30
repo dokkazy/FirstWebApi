@@ -2,12 +2,12 @@
 
 namespace FirstWebApi.Services.Interfaces
 {
-    public interface ICategoryRepository : IRepository<CategoryViewModel,int>
+    public interface ICategoryRepository
     {
-        new IEnumerable<CategoryViewModel> GetAll();
-        new CategoryViewModel GetById(int id);
-        new CategoryViewModel Add(CategoryViewModel model);
-        new void Update(CategoryViewModel model);
-        new void Remove(int id);
+        IEnumerable<CategoryViewModel> GetAll();
+        CategoryViewModel GetById(int id);
+        CategoryViewModel Add(CategoryViewModel model);
+        void Update(CategoryViewModel model);
+        void Remove(int id);
     }
 }
