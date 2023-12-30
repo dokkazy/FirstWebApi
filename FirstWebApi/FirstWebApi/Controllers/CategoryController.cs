@@ -1,6 +1,8 @@
 ﻿using FirstWebApi.Data;
 using FirstWebApi.Models;
+using FirstWebApi.Services.Interfaces;
 using FirstWebApi.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,23 +13,31 @@ namespace FirstWebApi.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly MyDbContext _db;
-        public CategoryController(MyDbContext db)
+        private readonly ICategoryRepository _categoryRepository;
+
+        public CategoryController(ICategoryRepository categoryRepository)
         {
-            _db = db;
+            _categoryRepository = categoryRepository;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllAsync()
+        public IActionResult GetAll()
         {
-            var categories = await _db.Categories.ToListAsync();
-            return Ok(categories);
+            try
+            {
+                var categories = _categoryRepository.GetAll();
+                return Ok(categories);
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public IActionResult GetById(int id)
         {
-            var cate = await _db.Categories.SingleOrDefaultAsync(c => c.Id == id);
-            if(cate == null) return NotFound();
+            var cate = _categoryRepository.GetById(id);
+            if (cate == null) return NotFound();
             return Ok(cate);
         }
 
@@ -36,32 +46,22 @@ namespace FirstWebApi.Controllers
         {
             try
             {
-                var cate = new Category()
-                {
-                    Name = model.Name,
-                };
-                _db.Add(cate);
-                _db.SaveChanges();
-                return Ok(cate);
+                var cate = _categoryRepository.Add(model);
+                return StatusCode(StatusCodes.Status201Created, cate);
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
-
         [HttpPut]
-        public IActionResult Create(int id, CategoryViewModel model)
+        public IActionResult Update(int id, CategoryViewModel model)
         {
             try
             {
-                var cate = _db.Categories.SingleOrDefault(c => c.Id == id);
-                if(cate == null) return NotFound();
-                cate.Name = model.Name;
-
-                _db.Update(cate);
-                _db.SaveChanges();
-                return Ok(cate);
+                if (id != model.Id) return NotFound();
+                _categoryRepository.Update(model);
+                return NoContent();
             }
             catch
             {
@@ -69,5 +69,18 @@ namespace FirstWebApi.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                _categoryRepository.Remove(id);
+                return Ok();
+            }
+            catch
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
     }
 }
