@@ -5,7 +5,7 @@ namespace FirstWebApi.ViewModels
 {
     public class CategoryViewModel
     {
-        [MaxLength(100)]
+        public int Id { get; set; }
         public string Name { get; set; }
     }
 }

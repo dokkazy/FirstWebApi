@@ -1,4 +1,6 @@
 ﻿using FirstWebApi.Models;
+using FirstWebApi.Services;
+using FirstWebApi.Services.Interfaces;
 using FirstWebApi.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +12,25 @@ namespace FirstWebApi.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        public static List<Product> list = new List<Product>();
+        private readonly IProductRepository _productRepository;
+
+        public ProductController(IProductRepository productRepository)
+        {
+            _productRepository = productRepository;
+        }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll(string? search, double? from, double? to, string? sortBy, int page = 1)
         {
-            return Ok(list);
+            try
+            {
+                var list = await _productRepository.GetAll(search, from, to, sortBy,page);
+                return Ok(list);
+            }
+            catch
+            {
+                return BadRequest("We can't get product");
+            }
         }
 
         [HttpGet("{id}")]
@@ -23,12 +38,13 @@ namespace FirstWebApi.Controllers
         {
             try
             {
-                var product = list.SingleOrDefault(x => x.Id == Guid.Parse(id));
+                var product = _productRepository.GetById(id);
                 if (product == null) return NotFound();
                 return Ok(product);
-            } catch (Exception ex)
+            }
+            catch
             {
-                return BadRequest(ex.Message);
+                return BadRequest();
             }
         }
 
@@ -36,14 +52,15 @@ namespace FirstWebApi.Controllers
         public IActionResult Create(ProductViewModel model)
         {
 
-            var product = new Product()
+            try
             {
-                Id = Guid.NewGuid(),
-                Name = model.Product.Name,
-                Price = model.Product.Price,
-            };
-            list.Add(product);
-            return Ok(new { success = true, data = product });
+                var product = _productRepository.Add(model);
+                return StatusCode(StatusCodes.Status201Created, product);
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
 
         [HttpPut("{id}")]
@@ -51,14 +68,9 @@ namespace FirstWebApi.Controllers
         {
             try
             {
-                var product = list.SingleOrDefault(x => x.Id == Guid.Parse(id));
-                if (product == null) return NotFound();
-                if (id != product.Id.ToString()) 
-                    return BadRequest();
-                product.Name = model.Product.Name;
-                product.Price = model.Product.Price;
-                return Ok();
-                
+                if (id != model.Id.ToString()) return NotFound();
+                _productRepository.Update(model);
+                return NoContent();
             }
             catch
             {
@@ -71,15 +83,12 @@ namespace FirstWebApi.Controllers
         {
             try
             {
-                var product = list.SingleOrDefault(x => x.Id == Guid.Parse(id));
-                if (product == null) return NotFound();
-                list.Remove(product);
+                _productRepository.Remove(id);
                 return Ok();
-
             }
             catch
             {
-                return BadRequest();
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
     }
