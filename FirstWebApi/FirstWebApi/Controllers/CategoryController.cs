@@ -42,6 +42,7 @@ namespace FirstWebApi.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IActionResult Create(CategoryViewModel model)
         {
             try
